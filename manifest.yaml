@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: indexed-job
+spec:
+  completions: 1
+  parallelism: 1
+  completionMode: Indexed
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+                - key: nautilus.io/sdsuinstruction
+                  operator: Exists
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/sdsu-fix
+        operator: Exists
+      restartPolicy: Never
+      # initContainers:
+      # - name: git-clone
+      #   image: bitnami/git:latest
+      #   command: ["git", "clone", ""]
+      #   volumeMounts:
+      #   - mountPath: /src
+      #     name: src
+      containers:
+      - name: worker
+        image: gitlab-registry.nrp-nautilus.io/prp/jupyter-stack/prp:v1.3
+        command: ["python", "/src/fastchat-api-load-testing.py"]
+        resources:
+          limits:
+            cpu: "4"
+            memory: 4Gi
+          requests:
+            cpu: "1"
+            memory: 1Gi
+        volumeMounts:
+        - mountPath: /etc/secret-volume
+          name: secret-volume
+          readOnly: true
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: fastchat-api

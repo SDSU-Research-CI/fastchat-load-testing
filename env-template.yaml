@@ -1,0 +1,3 @@
+fastchat:
+  base_url: "https://sdsu-rci-fastchat.nrp-nautilus.io/v1"
+  api_key: "YOUR_KEY_HERE"
