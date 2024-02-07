@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: indexed-job
 spec:
-  completions: 1
-  parallelism: 1
+  completions: 50
+  parallelism: 50
   completionMode: Indexed
   template:
     spec:
@@ -20,17 +20,18 @@ spec:
         key: nautilus.io/sdsu-fix
         operator: Exists
       restartPolicy: Never
-      # initContainers:
-      # - name: git-clone
-      #   image: bitnami/git:latest
-      #   command: ["git", "clone", ""]
-      #   volumeMounts:
-      #   - mountPath: /src
-      #     name: src
+      initContainers:
+      - name: git-clone
+        image: bitnami/git:latest
+        command: ["/bin/bash", "-c", "cd /src && git clone https://github.com/SDSU-Research-CI/fastchat-load-testing.git"]
+        volumeMounts:
+        - mountPath: /src
+          name: code
       containers:
       - name: worker
         image: gitlab-registry.nrp-nautilus.io/prp/jupyter-stack/prp:v1.3
-        command: ["python", "/src/fastchat-api-load-testing.py"]
+        command: ["python", "/src/fastchat-load-testing/fastchat-api-load-testing.py"]
+        # command: ["sleep", "3600"]
         resources:
           limits:
             cpu: "4"
@@ -41,8 +42,11 @@ spec:
         volumeMounts:
         - mountPath: /etc/secret-volume
           name: secret-volume
-          readOnly: true
+        - mountPath: /src
+          name: code
       volumes:
       - name: secret-volume
         secret:
           secretName: fastchat-api
+      - name: code
+        emptyDir: {}

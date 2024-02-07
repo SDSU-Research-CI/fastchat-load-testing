@@ -67,6 +67,7 @@ chat_prompts = [
     "Examine the role of language models in automated translation.",
     "How can language models be used for code understanding?",
     "Discuss the role of language models in autonomous systems."
+    "How can language models be used for code documentation?"
 ]
 
 # Create a chat completion
